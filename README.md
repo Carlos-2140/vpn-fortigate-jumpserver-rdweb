@@ -189,7 +189,7 @@ Este repositorio es público. Por esa razón:
 | Certificados RDS | ✅ |
 | Licenciamiento Per User | ✅ |
 | RD Web Client HTML5 publicado | ✅ |
-| Inicio de sesión final HTML5 | ⚠️ Parcial |
+| Inicio de sesión final HTML5 | ✅ Parcial |
 
 ## Nota
 
