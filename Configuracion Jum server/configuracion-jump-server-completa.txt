@@ -1,0 +1,729 @@
+CONFIGURACIÓN COMPLETA DEL JUMP SERVER - INFRAESTRUCTURA 2
+
+============================================================
+DATOS GENERALES
+============================================================
+
+Servidor:
+Windows Server
+
+Nombre del servidor:
+WIN-LEU177NL1UK
+
+FQDN:
+WIN-LEU177NL1UK.INFRA2.LOCAL
+
+Dirección IP:
+10.21.40.138
+
+Dominio:
+INFRA2.LOCAL
+
+Funciones principales:
+- Jump Server
+- Active Directory Domain Services (AD DS)
+- DNS
+- Remote Desktop Services (RDS)
+- RD Web Access
+- RD Connection Broker
+- RD Session Host
+- IIS
+- RemoteApp
+- RD Web Client HTML5
+
+
+============================================================
+1. CONFIGURACIÓN DE RED
+============================================================
+
+Dirección IP configurada en el Jump Server:
+
+10.21.40.138
+
+La interfaz de red del servidor se conectó a la red destinada
+al Jump Server detrás del FortiGate.
+
+Verificación de configuración:
+
+ipconfig /all
+
+Verificación de conectividad:
+
+ping 10.21.40.130
+
+El servidor debía poder alcanzar el WEB-Server Ubuntu:
+
+10.21.40.130
+
+Servicios probados desde el Jump Server hacia el WEB-Server:
+
+HTTPS:
+TCP 443
+
+SSH:
+TCP 22
+
+RDP / XRDP:
+TCP 3389
+
+
+============================================================
+2. ACTIVE DIRECTORY DOMAIN SERVICES
+============================================================
+
+Se instaló Active Directory Domain Services y se promovió el
+servidor como controlador de dominio.
+
+Dominio utilizado:
+
+INFRA2.LOCAL
+
+Nombre completo del servidor:
+
+WIN-LEU177NL1UK.INFRA2.LOCAL
+
+El Jump Server también presta el servicio DNS para el dominio.
+
+
+============================================================
+3. USUARIOS DE ACTIVE DIRECTORY
+============================================================
+
+Se crearon los siguientes usuarios:
+
+usuario_basico
+
+usuario_priv
+
+
+============================================================
+4. GRUPOS DE ACTIVE DIRECTORY
+============================================================
+
+Se crearon los siguientes grupos:
+
+RDS-BASICOS
+
+RDS-PRIVILEGIOS
+
+
+Asignación de usuarios:
+
+usuario_basico
+Miembro de:
+RDS-BASICOS
+
+usuario_priv
+Miembro de:
+RDS-PRIVILEGIOS
+
+
+============================================================
+5. REMOTE DESKTOP SERVICES
+============================================================
+
+Se instalaron y configuraron los servicios de Remote Desktop
+Services necesarios para publicar aplicaciones mediante
+RemoteApp y RD Web.
+
+Roles utilizados:
+
+- RD Connection Broker
+- RD Web Access
+- RD Session Host
+
+Colección creada:
+
+QuickSessionCollection
+
+
+============================================================
+6. CONTROL DE ACCESO A LA COLECCIÓN
+============================================================
+
+La colección QuickSessionCollection fue configurada para
+permitir el acceso mediante los grupos:
+
+RDS-BASICOS
+
+RDS-PRIVILEGIOS
+
+Esto permitió controlar las aplicaciones visibles para cada
+tipo de usuario.
+
+
+============================================================
+7. REMOTEAPPS PUBLICADAS
+============================================================
+
+Las aplicaciones publicadas fueron:
+
+1. Internet Explorer / navegador Web
+
+Ejecutable:
+
+iexplore.exe
+
+Asignación:
+
+RDS-BASICOS
+RDS-PRIVILEGIOS
+
+
+2. PuTTY
+
+Aplicación utilizada para acceso SSH al servidor Ubuntu.
+
+Asignación:
+
+RDS-PRIVILEGIOS
+
+
+3. Conexión a Escritorio remoto
+
+Ejecutable:
+
+mstsc.exe
+
+Asignación:
+
+RDS-PRIVILEGIOS
+
+
+============================================================
+8. PERFIL DE USUARIO BÁSICO
+============================================================
+
+Usuario:
+
+usuario_basico
+
+Grupo:
+
+RDS-BASICOS
+
+Acceso permitido:
+
+- Aplicación Web
+
+El usuario básico accedió al portal RD Web y únicamente
+visualizó la aplicación Web publicada.
+
+Desde la aplicación publicada se comprobó acceso a:
+
+https://10.21.40.130
+
+Resultado:
+
+Sistema de Caja accesible correctamente.
+
+
+============================================================
+9. PERFIL DE USUARIO PRIVILEGIADO
+============================================================
+
+Usuario:
+
+usuario_priv
+
+Grupo:
+
+RDS-PRIVILEGIOS
+
+Acceso permitido:
+
+- Web
+- PuTTY
+- Conexión a Escritorio remoto
+
+
+Prueba SSH:
+
+El usuario abrió PuTTY desde RemoteApp y estableció una sesión
+SSH hacia:
+
+10.21.40.130
+
+Puerto:
+
+22
+
+La sesión SSH fue establecida correctamente.
+
+
+Prueba RDP:
+
+El usuario ejecutó la RemoteApp:
+
+Conexión a Escritorio remoto
+
+Destino:
+
+10.21.40.130
+
+Puerto:
+
+3389
+
+El servidor Ubuntu respondió mediante XRDP y se mostró el
+escritorio gráfico.
+
+
+============================================================
+10. RD WEB ACCESS
+============================================================
+
+Portal RD Web configurado:
+
+https://WIN-LEU177NL1UK.INFRA2.LOCAL/RDWeb
+
+Ruta utilizada:
+
+/RDWeb/Pages/es-ES/default.aspx
+
+Desde este portal los usuarios podían iniciar sesión y abrir
+las RemoteApps asignadas según sus permisos.
+
+
+============================================================
+11. RESOLUCIÓN DEL NOMBRE DEL JUMP SERVER
+============================================================
+
+En el equipo cliente se utilizó el archivo HOSTS para asegurar
+la resolución del nombre del Jump Server.
+
+Entrada agregada:
+
+10.21.40.138 WIN-LEU177NL1UK.INFRA2.LOCAL
+
+Archivo de Windows:
+
+C:\Windows\System32\drivers\etc\hosts
+
+
+============================================================
+12. CERTIFICADOS DE REMOTE DESKTOP SERVICES
+============================================================
+
+Se creó y utilizó un certificado para:
+
+WIN-LEU177NL1UK.INFRA2.LOCAL
+
+Archivo PFX utilizado:
+
+C:\WebClient\RDS-BROKER.pfx
+
+El mismo certificado fue aplicado a los siguientes roles RDS:
+
+- RDRedirector
+  Connection Broker - Single Sign On
+
+- RDPublishing
+
+- RDWebAccess
+
+No se configuró RD Gateway.
+
+
+Comando de verificación utilizado:
+
+Get-RDCertificate -ConnectionBroker "WIN-LEU177NL1UK.INFRA2.LOCAL"
+
+
+Thumbprint del certificado utilizado:
+
+E8C2EB291CB0AFF1B6D2476389E02C93B6AAE375
+
+
+============================================================
+13. CERTIFICADO PÚBLICO DEL BROKER
+============================================================
+
+El certificado público fue exportado como:
+
+C:\WebClient\broker.cer
+
+Posteriormente se importó para el cliente web HTML5.
+
+Comando:
+
+Import-RDWebClientBrokerCert "C:\WebClient\broker.cer"
+
+También se agregó el certificado a Trusted Root Certification
+Authorities en los equipos necesarios.
+
+
+============================================================
+14. INSTALACIÓN DE RD WEB CLIENT HTML5
+============================================================
+
+Se utilizó el módulo:
+
+RDWebClientManagement
+
+Versión:
+
+1.0.4
+
+
+Ruta del módulo:
+
+C:\Program Files\WindowsPowerShell\Modules\RDWebClientManagement\1.0.4
+
+
+Debido a restricciones de ejecución, se utilizó temporalmente:
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+
+Se desbloquearon los archivos del módulo:
+
+Get-ChildItem "C:\Program Files\WindowsPowerShell\Modules\RDWebClientManagement\1.0.4" -Recurse -File | Unblock-File
+
+
+Importación del módulo:
+
+Import-Module "C:\Program Files\WindowsPowerShell\Modules\RDWebClientManagement\1.0.4\RDWebClientManagement.psd1" -Force
+
+
+============================================================
+15. PAQUETE RD WEB CLIENT
+============================================================
+
+En un equipo con acceso a Internet se descargó el paquete
+offline mediante:
+
+Save-RDWebClientPackage "C:\WebClient\"
+
+
+Paquete descargado:
+
+C:\WebClient\rdwebclient-2.1.85.0.zip
+
+
+Después se copió el archivo al Jump Server.
+
+
+Instalación:
+
+Install-RDWebClientPackage -Source "C:\WebClient\rdwebclient-2.1.85.0.zip"
+
+
+Verificación:
+
+Get-RDWebClientPackage
+
+
+Versión instalada:
+
+2.1.85.0
+
+Package ID:
+
+rd-html5
+
+Estado de publicación:
+
+Production
+
+
+============================================================
+16. PUBLICACIÓN DEL CLIENTE HTML5
+============================================================
+
+Después de importar el certificado del Broker se ejecutó:
+
+Publish-RDWebClientPackage -Type Production -Latest
+
+
+URL utilizada:
+
+https://WIN-LEU177NL1UK.INFRA2.LOCAL/RDWeb/webclient/index.html
+
+
+La interfaz HTML5 del Remote Desktop Web Client quedó
+publicada y accesible mediante HTTPS.
+
+
+============================================================
+17. AJUSTE DE IIS PARA EL WEB CLIENT
+============================================================
+
+Durante las pruebas, la URL original del archivo index.html
+respondía con error 404 aunque el directorio era accesible.
+
+Directorio del Web Client:
+
+C:\Program Files\RemoteDesktopWeb\Internal\Clients\obc3hirt.yos\content
+
+
+Se comprobó el acceso creando un archivo de prueba.
+
+Posteriormente se respaldó el index original y se reemplazó
+por una copia funcional.
+
+Se reinició IIS mediante:
+
+iisreset /noforce
+
+Después de este ajuste la URL:
+
+https://WIN-LEU177NL1UK.INFRA2.LOCAL/RDWeb/webclient/index.html
+
+mostró correctamente la pantalla de inicio de sesión HTML5.
+
+
+============================================================
+18. LICENCIAMIENTO RDS
+============================================================
+
+Se configuró Remote Desktop Licensing en modo:
+
+PerUser
+
+
+Servidor de licencias:
+
+WIN-LEU177NL1UK.INFRA2.LOCAL
+
+
+Comando de verificación:
+
+Get-RDLicenseConfiguration -ConnectionBroker "WIN-LEU177NL1UK.INFRA2.LOCAL"
+
+
+Resultado esperado:
+
+Mode:
+PerUser
+
+LicenseServer:
+WIN-LEU177NL1UK.INFRA2.LOCAL
+
+
+============================================================
+19. CONFIGURACIÓN DE WEBSOCKET PARA HTML5
+============================================================
+
+Para el cliente HTML5 se configuró el valor WebSocketURI.
+
+Ruta de registro:
+
+HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp
+
+
+Valor utilizado:
+
+WebSocketURI
+
+Configuración:
+
+https://+:3392/rdp/
+
+
+También se configuró el certificado SSL para:
+
+0.0.0.0:3392
+
+
+Certificado:
+
+E8C2EB291CB0AFF1B6D2476389E02C93B6AAE375
+
+
+Almacén:
+
+Remote Desktop
+
+
+Verificación:
+
+netsh http show sslcert ipport=0.0.0.0:3392
+
+
+============================================================
+20. FIREWALL DE WINDOWS
+============================================================
+
+Se verificaron reglas relacionadas con WebSocket / RDS.
+
+Reglas habilitadas:
+
+Escritorio remoto (TCP-WS-in)
+
+Escritorio remoto (TCP-WSS de entrada)
+
+
+Estado:
+
+Enabled
+
+Acción:
+
+Allow
+
+
+============================================================
+21. SERVICIOS RDS VERIFICADOS
+============================================================
+
+Servicios comprobados:
+
+TermService
+
+Estado observado:
+
+Running
+
+
+Tssdis
+
+Estado observado:
+
+Running
+
+
+============================================================
+22. PRUEBA DEL PUERTO TCP 3392
+============================================================
+
+Prueba local realizada:
+
+Test-NetConnection localhost -Port 3392
+
+
+También se verificó:
+
+netstat -ano | findstr :3392
+
+
+Resultado observado:
+
+El puerto TCP 3392 no quedó escuchando localmente.
+
+
+Desde el cliente VPN también se probó:
+
+Test-NetConnection WIN-LEU177NL1UK.INFRA2.LOCAL -Port 3392
+
+
+Resultado:
+
+TcpTestSucceeded : False
+
+
+============================================================
+23. ESTADO FINAL DEL CLIENTE HTML5
+============================================================
+
+El cliente HTML5 quedó:
+
+- Instalado
+- Publicado
+- Disponible mediante HTTPS
+- Visible en la URL oficial
+- Configurado con certificado
+- Configurado en modo Production
+
+Sin embargo, la autenticación final mediante HTML5 no quedó
+completamente operativa debido a que el listener WebSocket
+TCP 3392 no se registró localmente en el Jump Server.
+
+Este punto quedó documentado como limitación de la práctica.
+
+
+============================================================
+24. RESULTADOS FUNCIONALES DE LA PRÁCTICA
+============================================================
+
+FUNCIONANDO:
+
+- Active Directory
+- Dominio INFRA2.LOCAL
+- DNS
+- usuarios y grupos
+- Remote Desktop Services
+- QuickSessionCollection
+- RemoteApp
+- RD Web clásico
+- acceso Web al servidor Ubuntu
+- SSH mediante PuTTY
+- RDP mediante mstsc
+- control por grupos
+- certificados RDS
+- licenciamiento Per User
+- instalación del RD Web Client HTML5
+- publicación del cliente HTML5
+
+
+PARCIAL:
+
+- Inicio de sesión final mediante RD Web Client HTML5
+  por falta del listener local TCP 3392
+
+
+============================================================
+25. RESUMEN DE PERMISOS
+============================================================
+
+usuario_basico
+Grupo:
+RDS-BASICOS
+
+Aplicaciones:
+- Web
+
+
+usuario_priv
+Grupo:
+RDS-PRIVILEGIOS
+
+Aplicaciones:
+- Web
+- PuTTY
+- Conexión a Escritorio remoto
+
+
+============================================================
+26. SERVIDORES RELACIONADOS
+============================================================
+
+Jump Server:
+
+10.21.40.138
+
+WIN-LEU177NL1UK.INFRA2.LOCAL
+
+
+WEB-Server Ubuntu:
+
+10.21.40.130
+
+Servicios utilizados:
+
+HTTPS 443
+SSH 22
+XRDP 3389
+
+
+============================================================
+27. CONCLUSIÓN
+============================================================
+
+El Jump Server fue implementado como punto central de acceso
+administrativo y publicación de aplicaciones.
+
+Los usuarios se administraron mediante Active Directory y
+grupos separados según nivel de privilegio.
+
+El usuario básico solamente recibió acceso al recurso Web.
+
+El usuario privilegiado recibió acceso Web, SSH mediante
+PuTTY y escritorio remoto mediante RemoteApp.
+
+RD Web clásico funcionó correctamente y permitió validar los
+controles de acceso.
+
+El RD Web Client HTML5 fue instalado y publicado correctamente,
+aunque el acceso completo quedó limitado por la falta del
+listener WebSocket local en TCP 3392.
