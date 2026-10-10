@@ -2,8 +2,8 @@
 
 > **Práctica de Infraestructura 2 — Seguridad y acceso remoto**
 >
-> 🎥 **Video de demostración:** pendiente de agregar antes de la entrega.
-
+> 🎥 **Video de demostración:** (https://www.youtube.com/watch?v=6QaDm_4ZAI4)
+> 
 ## Descripción
 
 Este repositorio documenta la implementación de una infraestructura de acceso remoto seguro en **GNS3**, utilizando **FortiGate**, un **Jump Server con Windows Server**, **Remote Desktop Services (RDS)** y un **Web Server Ubuntu**.
